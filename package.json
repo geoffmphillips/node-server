@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "it's a server",
+  "main": "index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "geoffmphillips",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "jest": "^26.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.22"
+  }
+}
