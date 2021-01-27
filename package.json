@@ -4,7 +4,8 @@
   "description": "it's a server",
   "main": "index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "yarn tsc -p . && node index.js"
   },
   "author": "geoffmphillips",
   "license": "ISC",
