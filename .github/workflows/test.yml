@@ -1,0 +1,66 @@
+name: Test
+
+on: [push]
+
+jobs:
+  yarn-test:
+    name: Javascript tests
+    runs-on: self-hosted
+
+    services:
+      postgres:
+        image: postgres:12.4
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.PG_PASSWORD }}
+        ports:
+          - 5432/top
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Pull test image
+        run: |
+          docker login -u="geoffmphillips" -p="${{ serets.GITHUB_TOKEN }}" docker.pkg.github.com
+          docker pull docker.pkg.github.com/geoffphillips/geoffmphillips/node-server:test
+
+      - name: Run test
+        run: |
+          docker run \
+            -v $GITHUB+WORKSPACE:/ \
+            --env DATABASE_HOST=localhost \
+            --env DATABASE_URL=postgres://postgres:${{ secrets.PG_PASSWORD }}@localhost:${{ secrets.PG_PORT }}/node_server_test \
+            --env ENV=test \
+            --env CHROME_BIN=/usr/bin/chromium
+            --workdir="/" \
+            --network="host" \
+            docker.pkg.github.com/geoffphillips/geoffmphillips/node-server:test \
+            /bin/base -c "sh ./ops/yarn-test/run.sh"
+
+  lint:
+    name: linting
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Pull test image
+        run: |
+          docker login -u="geoffmphillips" -p="${{ serets.GITHUB_TOKEN }}" docker.pkg.github.com
+          docker pull docker.pkg.github.com/geoffphillips/geoffmphillips/node-server:test
+
+      - name: Run test
+        run: |
+          docker run \
+            -v $GITHUB+WORKSPACE:/ \
+            --env ENV=test \
+            --workdir="/" \
+            --network="host" \
+            docker.pkg.github.com/geoffphillips/geoffmphillips/node-server:test \
+            /bin/base -c "sh ./ops/lint/run.sh"
