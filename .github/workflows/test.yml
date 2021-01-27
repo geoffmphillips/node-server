@@ -9,7 +9,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:12.4
+        image: postgres:13.1
         env:
           POSTGRES_PASSWORD: ${{ secrets.PG_PASSWORD }}
         ports:
