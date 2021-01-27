@@ -1,6 +1,6 @@
 const requestHandlerConstructor = () => {
     return function requestHandlerInstance(request, response) {
-        console.log(request)
+        console.log(request);
     };
 }
 
