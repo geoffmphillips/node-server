@@ -1,4 +1,6 @@
-const debug = debugCtor("setting");
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSettings = void 0;
 const requiredFromEnv = {
     databaseUrl: "DB_URL",
     databaseUrlTest: "TEST_DB_URL",
@@ -11,7 +13,7 @@ const optionalFromEnv = {
     slackHook: "SLACK_HOOK",
 };
 let _settings;
-export async function getSettings() {
+async function getSettings() {
     if (!_settings) {
         _settings = {};
         const missingFromEnv = [];
@@ -21,13 +23,13 @@ export async function getSettings() {
             if (v === undefined) {
                 missingFromEnv.push(envName);
             }
-            debug(`${k}=${v} [${envName}]`);
+            console.log(`${k}=${v} [${envName}]`);
             _settings[k] = v;
         });
         Object.keys(optionalFromEnv).forEach((k) => {
             let envName = optionalFromEnv[k];
             const v = process.env[envName];
-            debug(`${k}=${v} [${envName}]`);
+            console.log(`${k}=${v} [${envName}]`);
             _settings[k] = v;
         });
         if (missingFromEnv.length) {
@@ -36,4 +38,5 @@ export async function getSettings() {
     }
     return _settings;
 }
+exports.getSettings = getSettings;
 //# sourceMappingURL=settings.js.map
