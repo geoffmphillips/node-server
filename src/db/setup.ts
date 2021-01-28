@@ -42,44 +42,44 @@ ${e}`);
   });
 }
 
-main(async () => {
-    if (!databaseUrl) {
-      console.log("DB_URL environment variable must be set.");
-      process.exit(-1);
-    } else {
-      console.log("Migrating db.");
-      const db = pgp(databaseUrl);
-      await doMigrations(db, fs, path);
-    }
-    if (testDatabaseUrl) {
-      console.log("Migrating TEST db.");
-      const db = pgp(testDatabaseUrl);
-      await doMigrations(db, fs, path);
-    }
-  });
+// main(async () => {
+//     if (!databaseUrl) {
+//       console.log("DB_URL environment variable must be set.");
+//       process.exit(-1);
+//     } else {
+//       console.log("Migrating db.");
+//       const db = pgp(databaseUrl);
+//       await doMigrations(db, fs, path);
+//     }
+//     if (testDatabaseUrl) {
+//       console.log("Migrating TEST db.");
+//       const db = pgp(testDatabaseUrl);
+//       await doMigrations(db, fs, path);
+//     }
+//   });
 
 
-  export const main = ((function mainCtor() {
-    process.on(
-      "unhandledRejection",
-      (error) => {
-        /* istanbul ignore next */
-        console.error(
-          `unhandledRejection: ${error}`,
-          error.stack,
-        );
-      },
-    );
-    return function main(f:()=>Promise<any>):void {
-      (async function () {
-        try {
-          await f();
-        } catch (e) {
-          console.error(e);
-          process.exit(-1);
-        }
-        console.log("done");
-        process.exit(0);
-      })();
-    };
-  })());
+//   export const main = ((function mainCtor() {
+//     process.on(
+//       "unhandledRejection",
+//       (error) => {
+//         /* istanbul ignore next */
+//         console.error(
+//           `unhandledRejection: ${error}`,
+//           error.stack,
+//         );
+//       },
+//     );
+//     return function main(f:()=>Promise<any>):void {
+//       (async function () {
+//         try {
+//           await f();
+//         } catch (e) {
+//           console.error(e);
+//           process.exit(-1);
+//         }
+//         console.log("done");
+//         process.exit(0);
+//       })();
+//     };
+//   })());
