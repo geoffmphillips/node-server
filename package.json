@@ -7,7 +7,6 @@
     "test": "yarn tsc -p . && jest --clearCache && jest",
     "start": "yarn tsc -p . && node ./src/index.js"
   },
-  "type": "module",
   "author": "geoffmphillips",
   "license": "ISC",
   "dependencies": {
