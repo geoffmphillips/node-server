@@ -7,11 +7,11 @@ import { requestHandler, requestHandlerType } from './request_handler';
 
 const PORT = process.env.PORT
 
-async function startServer<T>(requestHandler: requestHandlerType): Promise<T> {
+function startServer<T>(requestHandler: requestHandlerType): Promise<T> {
     http.createServer(requestHandler).listen(PORT);
     return;
 }
 
-await startServer(requestHandler);
+startServer(requestHandler);
 
 console.log(`listening on port ${PORT}`);
