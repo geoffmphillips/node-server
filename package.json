@@ -4,9 +4,10 @@
   "description": "it's a server",
   "main": "index.ts",
   "scripts": {
-    "test": "jest",
+    "test": "yarn tsc -p . && jest --clearCache && jest",
     "start": "yarn tsc -p . && node ./src/index.js"
   },
+  "type": "module",
   "author": "geoffmphillips",
   "license": "ISC",
   "dependencies": {
@@ -15,7 +16,7 @@
     "pg-promise": "^10.9.1"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^26.6.2",
     "@types/node": "^14.14.22",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
