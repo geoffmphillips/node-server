@@ -3,15 +3,27 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import { requestHandler, requestHandlerType } from './request_handler';
+import routes from './routes/index';
+import { dbProvider } from './db/db_provider'
+import { sessionHandler } from './middleware/session/index';
+
+
+import { requestHandlerConstructor } from './request_handler';
+
+const requestHandler = requestHandlerConstructor(
+  sessionHandler,
+  dbProvider,
+  routes,
+)
 
 const PORT = process.env.PORT
 
-function startServer<T>(requestHandler: requestHandlerType): Promise<T> {
+async function startServer<T>(requestHandler: requestHandlerType): Promise<T> {
     http.createServer(requestHandler).listen(PORT);
     return;
 }
 
-startServer(requestHandler);
-
-console.log(`listening on port ${PORT}`);
+(async function() {
+    await startServer(requestHandler);
+    console.log(`listening on port ${PORT}`);
+})();

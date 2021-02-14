@@ -1,5 +1,5 @@
-import {dbSession, sessionInfoType} from '../../db/db_session';
-import {setting} from "../../setting";
+import { dbSession, sessionInfoType } from '../../db/db_session';
+import { getSettings } from "../../config/settings";
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -27,7 +27,6 @@ export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
   async function init(ctx, setting) {
     const sessionCookieName = getSessionCookieName(setting);
     const sessionId = ctx.cookies.get(sessionCookieName);
-    debug(`init sessionId: ${JSON.stringify(sessionId)}`);
 
     if (sessionId) {
       ctx.sessionInfo = await dbSession.verify(sessionId, ctx.requestId);
@@ -39,7 +38,6 @@ export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
 
     ctx.session = ctx.sessionInfo.data;
 
-    debug(`sessionInfo: ${JSON.stringify(ctx.sessionInfo)}`);
   }
 
   async function clearCookie(ctx, setting) {
@@ -53,11 +51,6 @@ export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
     const secure = getSessionCookieSecure(setting);
 
     try {
-      debug(`setCookie ${JSON.stringify({
-        sessionInfo: ctx.sessionInfo,
-        sessionCookieMaxAge,
-        secure,
-      })}`);
       ctx.cookies.set(
         sessionCookieName,
         ctx.sessionInfo.sessionId,
@@ -67,32 +60,25 @@ export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
           secure,
         });
     } catch (e) {
-      debug("Could not set Cookie (in a websocket?)");
     }
   }
 
-  async function commit(ctx, setting) {
+  async function commit(ctx, getSettings) {
     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-    debug(`commit ${JSON.stringify({sessionInfo: ctx.sessionInfo, sessionCookieMaxAge})}`);
     await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
   }
 
   async function middleware(ctx, next) {
-    const s = await setting();
+    const s = await getSettings();
     if (ctx.url.match('/logout')) {
-      await clearCookie(ctx,s);
+      await clearCookie(ctx, s);
       ctx.redirect('/app');
       return;
     } else {
-      debug("init");
       await init(ctx, s);
-      debug("setCookie");
       await setCookie(ctx, s);
-      debug("next");
       await next();
-      debug("commit");
       await commit(ctx, s);
-      debug("fini");
     }
   }
 
@@ -103,7 +89,11 @@ export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
   };
 }
 
+export function sessionHandler() {
+
+}
+
 export const session = sessionCtor(
   dbSession,
-  setting,
+  getSettings,
 );
