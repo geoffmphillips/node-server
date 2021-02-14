@@ -3,12 +3,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import routes from './routes/index';
 import { dbProvider } from './db/db_provider'
+import { requestHandlerConstructor, requestHandlerType } from './request_handler';
+import routes from './routes/index';
+import { resolvedPromise } from './utils/resolved_promise';
 import { sessionHandler } from './middleware/session/index';
-
-
-import { requestHandlerConstructor } from './request_handler';
 
 const requestHandler = requestHandlerConstructor(
   sessionHandler,
@@ -18,9 +17,9 @@ const requestHandler = requestHandlerConstructor(
 
 const PORT = process.env.PORT
 
-async function startServer<T>(requestHandler: requestHandlerType): Promise<T> {
+async function startServer(requestHandler: requestHandlerType): Promise<null> {
     http.createServer(requestHandler).listen(PORT);
-    return;
+    return resolvedPromise;
 }
 
 (async function() {

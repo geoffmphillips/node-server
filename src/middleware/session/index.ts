@@ -1,99 +1,99 @@
-import { dbSession, sessionInfoType } from '../../db/db_session';
-import { getSettings } from "../../config/settings";
+// import { dbSession, sessionInfoType } from '../../db/db_session';
+// import { getSettings } from "../../config/settings";
 
-const ONE_HOUR = 60 * 60 * 1000;
+// const ONE_HOUR = 60 * 60 * 1000;
 
-type dbSessionType = typeof dbSession;
-type settingType = typeof setting;
+// type dbSessionType = typeof dbSession;
+// type settingType = typeof setting;
 
-export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
+// export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
 
-export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
-  function getSessionCookieMaxAge(setting) {
-    return setting.sessionCookieMaxAge || ONE_HOUR;
-  }
+// export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
+//   function getSessionCookieMaxAge(setting) {
+//     return setting.sessionCookieMaxAge || ONE_HOUR;
+//   }
 
-  function getSessionCookieName(setting) {
-    if (setting.sessionCookieName) {
-      return setting.sessionCookieName;
-    }
-    return "_sessionId";
-  }
+//   function getSessionCookieName(setting) {
+//     if (setting.sessionCookieName) {
+//       return setting.sessionCookieName;
+//     }
+//     return "_sessionId";
+//   }
 
-  function getSessionCookieSecure(setting) {
-    return setting.sessionCookieSecure || false;
-  }
+//   function getSessionCookieSecure(setting) {
+//     return setting.sessionCookieSecure || false;
+//   }
 
-  async function init(ctx, setting) {
-    const sessionCookieName = getSessionCookieName(setting);
-    const sessionId = ctx.cookies.get(sessionCookieName);
+//   async function init(ctx, setting) {
+//     const sessionCookieName = getSessionCookieName(setting);
+//     const sessionId = ctx.cookies.get(sessionCookieName);
 
-    if (sessionId) {
-      ctx.sessionInfo = await dbSession.verify(sessionId, ctx.requestId);
-    }
+//     if (sessionId) {
+//       ctx.sessionInfo = await dbSession.verify(sessionId, ctx.requestId);
+//     }
 
-    if (!ctx.sessionInfo) {
-      ctx.sessionInfo = await dbSession.create(ctx.requestId);
-    }
+//     if (!ctx.sessionInfo) {
+//       ctx.sessionInfo = await dbSession.create(ctx.requestId);
+//     }
 
-    ctx.session = ctx.sessionInfo.data;
+//     ctx.session = ctx.sessionInfo.data;
 
-  }
+//   }
 
-  async function clearCookie(ctx, setting) {
-    const sessionCookieName = getSessionCookieName(setting);
-    ctx.cookies.set(sessionCookieName);
-  }
+//   async function clearCookie(ctx, setting) {
+//     const sessionCookieName = getSessionCookieName(setting);
+//     ctx.cookies.set(sessionCookieName);
+//   }
 
-  async function setCookie(ctx, setting) {
-    const sessionCookieName = getSessionCookieName(setting);
-    const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-    const secure = getSessionCookieSecure(setting);
+//   async function setCookie(ctx, setting) {
+//     const sessionCookieName = getSessionCookieName(setting);
+//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
+//     const secure = getSessionCookieSecure(setting);
 
-    try {
-      ctx.cookies.set(
-        sessionCookieName,
-        ctx.sessionInfo.sessionId,
-        {
-          maxAge: sessionCookieMaxAge,
-          httpOnly: true,
-          secure,
-        });
-    } catch (e) {
-    }
-  }
+//     try {
+//       ctx.cookies.set(
+//         sessionCookieName,
+//         ctx.sessionInfo.sessionId,
+//         {
+//           maxAge: sessionCookieMaxAge,
+//           httpOnly: true,
+//           secure,
+//         });
+//     } catch (e) {
+//     }
+//   }
 
-  async function commit(ctx, getSettings) {
-    const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-    await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
-  }
+//   async function commit(ctx, getSettings) {
+//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
+//     await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
+//   }
 
-  async function middleware(ctx, next) {
-    const s = await getSettings();
-    if (ctx.url.match('/logout')) {
-      await clearCookie(ctx, s);
-      ctx.redirect('/app');
-      return;
-    } else {
-      await init(ctx, s);
-      await setCookie(ctx, s);
-      await next();
-      await commit(ctx, s);
-    }
-  }
+//   async function middleware(ctx, next) {
+//     const s = await getSettings();
+//     if (ctx.url.match('/logout')) {
+//       await clearCookie(ctx, s);
+//       ctx.redirect('/app');
+//       return;
+//     } else {
+//       await init(ctx, s);
+//       await setCookie(ctx, s);
+//       await next();
+//       await commit(ctx, s);
+//     }
+//   }
 
-  return {
-    getSessionCookieName,
-    getSessionCookieMaxAge,
-    middleware,
-  };
-}
+//   return {
+//     getSessionCookieName,
+//     getSessionCookieMaxAge,
+//     middleware,
+//   };
+// }
 
 export function sessionHandler() {
 
 }
 
-export const session = sessionCtor(
-  dbSession,
-  getSettings,
-);
+// export const session = sessionCtor(
+//   dbSession,
+//   getSettings,
+// );
