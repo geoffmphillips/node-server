@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dbProvider = exports.dbProviderCtor = void 0;
 const pg_promise_1 = __importDefault(require("pg-promise"));
-const settings_1 = require("./settings");
+const settings_1 = require("../config/settings");
 function dbProviderCtor(settings, test = false) {
     let db;
     async function dbProvider(callback) {
@@ -14,7 +14,7 @@ function dbProviderCtor(settings, test = false) {
             const pgPromiseOptions = {};
             db = pg_promise_1.default(pgPromiseOptions)(test ? databaseUrlTest : databaseUrl);
         }
-        return db.tx(async (db) => {
+        return db.tx((db) => {
             return callback(db);
         });
     }
