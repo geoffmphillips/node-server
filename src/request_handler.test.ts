@@ -1,7 +1,12 @@
 import { requestHandlerConstructor } from './request_handler';
 
-test('this is a test of a test', () => {
-    const subject = requestHandlerConstructor(function() {}, function() {}, {})
-    const result = subject({}, { end: function() {} });
-    expect(1).toBe(1);
+test('this is a test of a test', async () => {
+    const subject = requestHandlerConstructor(function() {}, function() {}, {});
+    const request = { 
+      getHeader: function(header) { return [] },
+      url: 'https://example.org/'
+    };
+    const response = { end: function() {} };
+    const result = await subject(request, response);
+    expect(result).toBe(null);
 })

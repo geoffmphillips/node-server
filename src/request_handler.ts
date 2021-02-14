@@ -2,15 +2,16 @@ import { URL } from 'url';
 import { resolvedPromise } from './utils/resolved_promise';
 
 type contextType = {}
+type requestHandlerType = (request, reponse) => Promise<null>
 
 const requestHandlerConstructor = (
     sessionHandler,
     dbProvider,
     routes,
     middleware: ((context: contextType, request, response) => contextType)[] = [],
-) => {
+): requestHandlerType => {
 
-  return async function requestHandlerInstance(request, response) {
+  return async function requestHandlerInstance(request, response): Promise<null> {
     console.log(request);
 
     const cookies = request.getHeader('Cookie').reduce((accCookies, cookie) => {
@@ -40,8 +41,8 @@ const requestHandlerConstructor = (
       } else {
         routes[context.auth.isForbidden ? '403' : '401'](context);
       }
-    } else {
-      routes['404'](context);
+    } else if (routes['404']) {
+      routes['404'].GET(context);
     }
 
     response.end();
@@ -49,4 +50,4 @@ const requestHandlerConstructor = (
   };
 }
 
-export { requestHandlerConstructor };
+export { requestHandlerConstructor, requestHandlerType };
