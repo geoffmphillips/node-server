@@ -1,5 +1,5 @@
 import pgPromise from 'pg-promise';
-import { getSettings, settingsType } from './settings';
+import { getSettings, settingsType } from '../config/settings';
 
 type Ext = {};
 export type dbType = pgPromise.IDatabase<Ext>;
@@ -15,7 +15,7 @@ export function dbProviderCtor(settings: () => Promise<settingsType>, test: bool
       db = pgPromise<Ext>(pgPromiseOptions)(test ? databaseUrlTest : databaseUrl);
     }
 
-    return db.tx(async (db) => {
+    return db.tx((db: dbType) => {
       return callback(db);
     });
   }
