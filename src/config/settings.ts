@@ -49,6 +49,7 @@ export async function getSettings(): Promise<settingsType> {
       throw new Error(`Setting(s) missing in ENV: ${missingFromEnv.join(", ")}`);
     }
   }
+  
   return _settings;
 }
 
