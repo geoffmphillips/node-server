@@ -74,7 +74,10 @@ exports.sessionHandler = void 0;
 //     middleware,
 //   };
 // }
-function sessionHandler() {
+function sessionHandler(context) {
+    return {
+        ...context,
+    };
 }
 exports.sessionHandler = sessionHandler;
 // export const session = sessionCtor(
