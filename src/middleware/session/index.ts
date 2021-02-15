@@ -89,8 +89,10 @@
 //   };
 // }
 
-export function sessionHandler() {
-
+export function sessionHandler(context) {
+  return {
+    ...context,
+  }
 }
 
 // export const session = sessionCtor(
