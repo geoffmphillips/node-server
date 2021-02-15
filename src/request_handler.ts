@@ -20,40 +20,44 @@ const requestHandlerConstructor = (
 ): requestHandlerType => {
 
   return async function requestHandlerInstance(request, response): Promise<null> {
-    const cookieHeaders = request.headers['cookie'];
-    const cookies = cookieHeaders ? cookieHeaders.reduce((accCookies: {}, cookie: string) => {
-      const cookieParts = cookie.split(';');
-      return {
-        ...accCookies,
-        [cookieParts.shift().trim()]: decodeURI(cookieParts.join('=')),
-      };
-    }, {}) : {};
-
-    const requestUrl = new URL(`${process.env.BASE_URL}${request.url}`);
-
-    const context = createContext(dbProvider, sessionHandler, ...middleware)({ 
-      request, 
-      response, 
-      cookies,
-      requestUrl,
-    });
-
-    
-    if (routes[requestUrl.pathname] && routes[requestUrl.pathname][context.request.method]) {
-      // TO DO implement AUTH
-      // if (context.auth.isAuthorized) {
-      if (true) {
-        routes[requestUrl.pathname][context.request.method](context)
-      } else {
-        routes[context.auth.isForbidden ? '403' : '401'](context);
+    try {
+      const cookieHeaders = request.headers['cookie'];
+      const cookies = cookieHeaders ? cookieHeaders.reduce((accCookies: {}, cookie: string) => {
+        const cookieParts = cookie.split(';');
+        return {
+          ...accCookies,
+          [cookieParts.shift().trim()]: decodeURI(cookieParts.join('=')),
+        };
+      }, {}) : {};
+  
+      const requestUrl = new URL(`${process.env.BASE_URL}${request.url}`);
+  
+      const context = createContext(dbProvider, sessionHandler, ...middleware)({ 
+        request, 
+        response, 
+        cookies,
+        requestUrl,
+      });
+  
+      
+      if (routes[requestUrl.pathname] && routes[requestUrl.pathname][context.request.method]) {
+        // TO DO implement AUTH
+        // if (context.auth.isAuthorized) {
+        if (true) {
+          routes[requestUrl.pathname][context.request.method](context)
+        } else {
+          routes[context.auth.isForbidden ? '403' : '401'](context);
+        }
+      } else if (routes['404']) {
+        routes['404'].GET(context);
       }
-    } else if (routes['404']) {
-      routes['404'].GET(context);
+    } catch (error) {
+      routes['500'].GET();
     }
 
     response.end();
     return await resolvedPromise;
-  };
+  }
 }
 
 const createContext = (...middleware: middlewareType[]) => (initialContext) => middleware.reduce((accContext, fn) => fn(accContext), initialContext)
