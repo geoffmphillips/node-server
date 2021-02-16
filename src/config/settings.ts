@@ -29,6 +29,8 @@ export type settingsType = {
     projectUrl?: string | undefined,
     sessionSecret?: string | undefined,
     slackHook?: string | undefined,
+    sessionCookieMaxAge?: number | undefined,
+    sessionCookieName?: string | undefined,
 }
 
 let _settings: settingsType;
