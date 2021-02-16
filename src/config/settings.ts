@@ -1,3 +1,13 @@
+import path from 'path';
+import dotenv from 'dotenv';
+
+if (!process.env.DB_URL) {
+  const pathname: string = path.join(__dirname, '../../.env');
+  dotenv.config({
+    path: pathname,
+  });
+}
+
 const requiredFromEnv = {
   databaseUrl: "DB_URL",
   databaseUrlTest: "TEST_DB_URL",
@@ -23,7 +33,7 @@ export type settingsType = {
 
 let _settings: settingsType;
 
-export async function getSettings(): Promise<settingsType> {
+export function getSettings(): settingsType {
   if (!_settings) {
     _settings = {};
     const missingFromEnv: string[] = [];
