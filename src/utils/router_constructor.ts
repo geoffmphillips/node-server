@@ -1,16 +1,18 @@
 type controllerMethodType = (context) => Promise<any>
+type addRouteType = (path: string, controllerMethod: controllerMethodType, httpMethod: string, context: routerType) => void;
+type typedAddRoute = (path: string, method: controllerMethodType) => void;
 type routerType = {
-  addRoute: (path: string, controllerMethod: controllerMethodType, httpMethod: string, context) => void,
-  get: (path: string, method: controllerMethodType) => void,
-  post: (path: string, method: controllerMethodType) => void,
+  addRoute: addRouteType,
+  get: typedAddRoute,
+  post: typedAddRoute,
 }
 
 function routerContstructor(prefix: string): routerType {
-  const addRoute = (path, controllerMethod, httpMethod, __context) => {
+  const addRoute: addRouteType = (path, controllerMethod, httpMethod, __context) => {
     __context[prefix + path] = { [httpMethod]: controllerMethod };
   }
 
-  const router = {
+  const router: routerType = {
     addRoute,
     get: (path, method) => {
       addRoute(path, method, 'GET', router);
