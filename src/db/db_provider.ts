@@ -1,27 +1,24 @@
 import pgPromise from 'pg-promise';
 import { getSettings, settingsType } from '../config/settings';
+import { dbType } from './db';
 
-type Ext = {};
-export type dbType = pgPromise.IDatabase<Ext>;
+function dbProviderConstructor(settings: () => settingsType, test: boolean = false) {
+  let db: dbType;
 
-export function dbProviderCtor(settings: () => Promise<settingsType>, test: boolean = false) {
-  let db: any;
-
-  async function dbProvider<T>(callback: (db: dbType) => Promise<T>): Promise<T> {
+  return async function dbProvider<T>(callback: (db: dbType) => Promise<T>): Promise<T> {
     if (!db) {
-      const { databaseUrl, databaseUrlTest } = await settings();
+      const { databaseUrl, databaseUrlTest } = settings();
       const pgPromiseOptions = {};
 
-      db = pgPromise<Ext>(pgPromiseOptions)(test ? databaseUrlTest : databaseUrl);
+      db = pgPromise(pgPromiseOptions)(test ? databaseUrlTest : databaseUrl);
     }
 
     return db.tx((db: dbType) => {
       return callback(db);
     });
   }
-
-  return dbProvider;
 }
 
-export const dbProvider = dbProviderCtor(getSettings);
-export type dbProviderType = typeof dbProvider;
+const dbProvider = dbProviderConstructor(getSettings);
+
+export { dbProvider, dbProviderConstructor };

@@ -1,0 +1,1 @@
+export const resolvedNull = Promise.resolve(null);
