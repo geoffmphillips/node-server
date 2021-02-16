@@ -9,13 +9,13 @@ dotenv_1.default.config();
 // import { dbProvider } from './db/db_provider'
 const request_handler_1 = require("./request_handler");
 const index_1 = __importDefault(require("./routes/index"));
-const resolved_promise_1 = require("./utils/resolved_promise");
+const resolved_null_1 = require("./utils/resolved_null");
 const index_2 = require("./middleware/session/index");
 const requestHandler = request_handler_1.requestHandlerConstructor(index_2.sessionHandler, (context) => ({ ...context }), index_1.default);
 const PORT = process.env.PORT;
 async function startServer(requestHandler) {
     http_1.default.createServer(requestHandler).listen(PORT);
-    return resolved_promise_1.resolvedPromise;
+    return resolved_null_1.resolvedNull;
 }
 (async function () {
     await startServer(requestHandler);
