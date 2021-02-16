@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "lint": "eslint --ext .js,.ts",
+    "migrate": "node ./src/db/migrate_latest.js",
     "setup": "node ./src/db/setup.js",
     "start": "yarn tsc -p . && node ./src/index.js",
     "test": "yarn tsc -p . && jest --clearCache && jest"
