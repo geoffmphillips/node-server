@@ -7,9 +7,5 @@ const hello_1 = __importDefault(require("../controllers/hello"));
 const router_constructor_1 = require("../utils/router_constructor");
 const helloRouter = router_constructor_1.routerContstructor('/hello');
 helloRouter.get('/', hello_1.default.index);
-exports.default = {
-    '/hello/': {
-        GET: hello_1.default.index,
-    }
-};
+exports.default = helloRouter;
 //# sourceMappingURL=hello.js.map

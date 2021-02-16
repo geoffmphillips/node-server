@@ -4,8 +4,4 @@ import { routerContstructor } from '../utils/router_constructor';
 const helloRouter = routerContstructor('/hello');
 helloRouter.get('/', controller.index);
 
-export default {
-  '/hello/': {
-    GET: controller.index,
-  }
-}
+export default helloRouter;
