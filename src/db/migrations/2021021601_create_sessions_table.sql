@@ -1,0 +1,6 @@
+CREATE UNLOGGED TABLE IF NOT EXISTS sessions (
+  id BYTEA PRIMARY KEY,
+  user_id UUID REFERENCES users,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  expires_at TIMESTAMPTZ DEFAULT now() + '1 hour'::INTERVAL NOT NULL
+);
