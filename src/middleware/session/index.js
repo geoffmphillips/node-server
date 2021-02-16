@@ -1,82 +1,54 @@
 "use strict";
-// import { dbSession, sessionInfoType } from '../../db/db_session';
-// import { getSettings } from "../../config/settings";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sessionHandler = void 0;
-// const ONE_HOUR = 60 * 60 * 1000;
-// type dbSessionType = typeof dbSession;
-// type settingType = typeof setting;
-// export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
-// export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
-//   function getSessionCookieMaxAge(setting) {
-//     return setting.sessionCookieMaxAge || ONE_HOUR;
-//   }
-// function getSessionCookieName(setting) {
-//   return setting.sessionCookieName ? setting.sessionCookieName : "_sessionId";
-// }
-//   function getSessionCookieSecure(setting) {
-//     return setting.sessionCookieSecure || false;
-//   }
-//   async function init(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     const sessionId = ctx.cookies.get(sessionCookieName);
-//     if (sessionId) {
-//       ctx.sessionInfo = await dbSession.verify(sessionId, ctx.requestId);
-//     }
-//     if (!ctx.sessionInfo) {
-//       ctx.sessionInfo = await dbSession.create(ctx.requestId);
-//     }
-//   }
-//   async function clearCookie(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     ctx.cookies.set(sessionCookieName);
-//   }
-//   async function setCookie(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-//     const secure = getSessionCookieSecure(setting);
-//     try {
-//       ctx.cookies.set(
-//         sessionCookieName,
-//         ctx.sessionInfo.sessionId,
-//         {
-//           maxAge: sessionCookieMaxAge,
-//           httpOnly: true,
-//           secure,
-//         });
-//     } catch (e) {
-//     }
-//   }
-//   async function commit(ctx, getSettings) {
-//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-//     await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
-//   }
-//   async function sessionHandler(ctx, next) {
-//     const s = await getSettings();
-//     if (ctx.url.match('/logout')) {
-//       await clearCookie(ctx, s);
-//       ctx.redirect('/app');
-//       return;
-//     } else {
-//       await init(ctx, s);
-//       await setCookie(ctx, s);
-//       await commit(ctx, s);
-//     }
-//   }
-//   return {
-//     getSessionCookieName,
-//     getSessionCookieMaxAge,
-//     sessionHandler,
-//   };
-// }
-function sessionHandler(context) {
-    return {
-        ...context,
+exports.sessionHandler = exports.sessionCtor = void 0;
+const db_session_1 = require("../../db/db_session");
+const settings_1 = require("../../config/settings");
+const ONE_HOUR = 60 * 60 * 1000;
+function sessionCtor(getSettings) {
+    function getSessionCookieMaxAge(settings) {
+        return settings.sessionCookieMaxAge || ONE_HOUR;
+    }
+    function getSessionCookieName(settings) {
+        return settings.sessionCookieName ? settings.sessionCookieName : "_sessionId";
+    }
+    function clearCookie(context, settings) {
+        const sessionCookieName = getSessionCookieName(settings);
+        context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Expires=${Date.now()};`]);
+    }
+    function setCookie(context, settings) {
+        const sessionCookieName = getSessionCookieName(settings);
+        const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
+        context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Max-Age=${sessionCookieMaxAge}; HttpOnly`]);
+    }
+    async function initSession(context, settings) {
+        const sessionCookieName = getSessionCookieName(settings);
+        if (context?.cookies[sessionCookieName]) {
+            context.session = await db_session_1.dbSession.verify(context.cookies[sessionCookieName]);
+        }
+        if (!context.session) {
+            context.session = await db_session_1.dbSession.create();
+        }
+    }
+    async function updateSessionInDb(context, settings) {
+        const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
+        await db_session_1.dbSession.update(context.session, sessionCookieMaxAge);
+    }
+    return function sessionHandler(context) {
+        const settings = getSettings();
+        if (context.requestUrl.pathname.match('/logout')) {
+            clearCookie(context, settings);
+            // TODO implement logout redirect
+            // context.redirect('/');
+            return;
+        }
+        else {
+            initSession(context, settings);
+            setCookie(context, settings);
+            updateSessionInDb(context, settings);
+        }
+        return context;
     };
 }
-exports.sessionHandler = sessionHandler;
-// export const session = sessionCtor(
-//   dbSession,
-//   getSettings,
-// );
+exports.sessionCtor = sessionCtor;
+exports.sessionHandler = sessionCtor(settings_1.getSettings);
 //# sourceMappingURL=index.js.map

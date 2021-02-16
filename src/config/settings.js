@@ -22,6 +22,8 @@ const requiredFromEnv = {
 };
 const optionalFromEnv = {
     slackHook: "SLACK_HOOK",
+    sessionCookieMaxAge: "SESSION_MAX_AGE",
+    sessionCookieName: "SESSION_NAME",
 };
 let _settings;
 function getSettings() {

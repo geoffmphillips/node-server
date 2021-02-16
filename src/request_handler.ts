@@ -13,7 +13,7 @@ type requestType = {
   method?: string,
 };
 type responseType = {
-  setHeader: (header: string, value: string) => void,
+  setHeader: (header: string, value: string | string[]) => void,
   end: (data?: string) => void,
   writeHead: (errocode: number, headers?: {}) => void,
   write: (html: Buffer) => void,
@@ -24,6 +24,8 @@ type contextType = {
   auth?: authType,
   requestUrl: URL,
   dbProvider?: dbProviderType,
+  cookies?: string[],
+  session?: any,
 }
 type middlewareType = (context: contextType) => contextType;
 type requestHandlerType = (request: requestType, reponse: responseType) => Promise<null>
@@ -105,4 +107,4 @@ const serveError = (errorCode: number, response: responseType): void => {
 
 const createContext = (...middleware: middlewareType[]) => (initialContext) => middleware.reduce((accContext, fn) => fn(accContext), initialContext)
 
-export { requestHandlerConstructor, requestHandlerType };
+export { requestHandlerConstructor, requestHandlerType, contextType };

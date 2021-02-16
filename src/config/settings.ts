@@ -19,6 +19,8 @@ const requiredFromEnv = {
 
 const optionalFromEnv = {
   slackHook: "SLACK_HOOK",
+  sessionCookieMaxAge: "SESSION_MAX_AGE",
+  sessionCookieName: "SESSION_NAME",
 };
 
 export type settingsType = {
@@ -29,6 +31,8 @@ export type settingsType = {
     projectUrl?: string | undefined,
     sessionSecret?: string | undefined,
     slackHook?: string | undefined,
+    sessionCookieMaxAge?: number | undefined,
+    sessionCookieName?: string | undefined,
 }
 
 let _settings: settingsType;

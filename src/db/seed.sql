@@ -1,11 +1,11 @@
 GRANT ALL ON SCHEMA meta TO postgres;
 GRANT ALL ON SCHEMA meta TO geoff;
 
-DROP TABLE IF EXISTS public.users;
 DROP TABLE IF EXISTS meta.migrations;
+DROP TABLE IF EXISTS public.users CASCADE;
 
 CREATE TABLE IF NOT EXISTS public.users (
-  id UUID,
+  id UUID PRIMARY KEY,
   roles TEXT[],
   email TEXT,
   digest TEXT

@@ -20,13 +20,14 @@ export async function migrateDb(db: dbType): Promise<null> {
     { migrations },
   );
 
-  notApplied.forEach(async ({ id }) => {
+  notApplied.forEach(async ({ id }): Promise<null> => {
     const migrationSql: string = fs.readFileSync(path.join(__dirname, migrationsDirectory, id), "utf-8");
 
     try {
       await db.none(migrationSql);
       await db.none('INSERT INTO meta.migrations (id) VALUES ($(id))', { id });
       console.log(`Applied migration ${id}`);
+      return resolvedNull;
     } catch (error) {
       console.log(`${id} not applied do to error:`, error);
     }

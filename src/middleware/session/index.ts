@@ -1,101 +1,69 @@
-// import { dbSession, sessionInfoType } from '../../db/db_session';
-// import { getSettings } from "../../config/settings";
+import { dbSession, sessionInfoType } from '../../db/db_session';
+import { getSettings, settingsType } from '../../config/settings';
+import { contextType } from '../../request_handler';
 
-// const ONE_HOUR = 60 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
-// type dbSessionType = typeof dbSession;
-// type settingType = typeof setting;
+type dbSessionType = typeof dbSession;
 
-// export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
+export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
 
-// export function sessionCtor(dbSession: dbSessionType, setting: settingType) {
-//   function getSessionCookieMaxAge(setting) {
-//     return setting.sessionCookieMaxAge || ONE_HOUR;
-//   }
+export function sessionCtor(getSettings: () => settingsType) {
+  function getSessionCookieMaxAge(settings: settingsType) {
+    return settings.sessionCookieMaxAge || ONE_HOUR;
+  }
 
-//   function getSessionCookieName(setting) {
-//     if (setting.sessionCookieName) {
-//       return setting.sessionCookieName;
-//     }
-//     return "_sessionId";
-//   }
+  function getSessionCookieName(settings: settingsType) {
+    return settings.sessionCookieName ? settings.sessionCookieName : "_sessionId";
+  }
 
-//   function getSessionCookieSecure(setting) {
-//     return setting.sessionCookieSecure || false;
-//   }
+  function clearCookie(context: contextType, settings: settingsType) {
+    const sessionCookieName = getSessionCookieName(settings);
+    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Expires=${Date.now()};` ]);
+  }
 
-//   async function init(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     const sessionId = ctx.cookies.get(sessionCookieName);
+  function setCookie(context: contextType, settings: settingsType) {
+    const sessionCookieName = getSessionCookieName(settings);
+    const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
 
-//     if (sessionId) {
-//       ctx.sessionInfo = await dbSession.verify(sessionId, ctx.requestId);
-//     }
+    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Max-Age=${sessionCookieMaxAge}; HttpOnly` ]);
+  }
 
-//     if (!ctx.sessionInfo) {
-//       ctx.sessionInfo = await dbSession.create(ctx.requestId);
-//     }
+  async function initSession(context: contextType, settings: settingsType) {
+    const sessionCookieName = getSessionCookieName(settings);
 
-//     ctx.session = ctx.sessionInfo.data;
+    if (context?.cookies[sessionCookieName]) {
+      context.session = await dbSession.verify(context.cookies[sessionCookieName]);
+    }
 
-//   }
+    if (!context.session) {
+      context.session = await dbSession.create();
+    }
+  }
 
-//   async function clearCookie(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     ctx.cookies.set(sessionCookieName);
-//   }
+  async function updateSessionInDb(context: contextType, settings: settingsType) {
+    const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
+    await dbSession.update(context.session, sessionCookieMaxAge);
+  }
 
-//   async function setCookie(ctx, setting) {
-//     const sessionCookieName = getSessionCookieName(setting);
-//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-//     const secure = getSessionCookieSecure(setting);
+  return function sessionHandler(context: contextType) {
+    const settings = getSettings();
 
-//     try {
-//       ctx.cookies.set(
-//         sessionCookieName,
-//         ctx.sessionInfo.sessionId,
-//         {
-//           maxAge: sessionCookieMaxAge,
-//           httpOnly: true,
-//           secure,
-//         });
-//     } catch (e) {
-//     }
-//   }
+    if (context.requestUrl.pathname.match('/logout')) {
+      clearCookie(context, settings);
+      // TODO implement logout redirect
+      // context.redirect('/');
+      return;
+    } else {
+      initSession(context, settings);
+      setCookie(context, settings);
+      updateSessionInDb(context, settings);
+    }
 
-//   async function commit(ctx, getSettings) {
-//     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
-//     await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
-//   }
-
-//   async function middleware(ctx, next) {
-//     const s = await getSettings();
-//     if (ctx.url.match('/logout')) {
-//       await clearCookie(ctx, s);
-//       ctx.redirect('/app');
-//       return;
-//     } else {
-//       await init(ctx, s);
-//       await setCookie(ctx, s);
-//       await next();
-//       await commit(ctx, s);
-//     }
-//   }
-
-//   return {
-//     getSessionCookieName,
-//     getSessionCookieMaxAge,
-//     middleware,
-//   };
-// }
-
-export function sessionHandler(context) {
-  return {
-    ...context,
+    return context;
   }
 }
 
-// export const session = sessionCtor(
-//   dbSession,
-//   getSettings,
-// );
+export const sessionHandler = sessionCtor(
+  getSettings,
+);
