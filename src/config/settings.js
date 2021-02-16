@@ -1,6 +1,17 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSettings = void 0;
+const path_1 = __importDefault(require("path"));
+const dotenv_1 = __importDefault(require("dotenv"));
+if (!process.env.DB_URL) {
+    const pathname = path_1.default.join(__dirname, '../../.env');
+    dotenv_1.default.config({
+        path: pathname,
+    });
+}
 const requiredFromEnv = {
     databaseUrl: "DB_URL",
     databaseUrlTest: "TEST_DB_URL",
@@ -13,22 +24,19 @@ const optionalFromEnv = {
     slackHook: "SLACK_HOOK",
 };
 let _settings;
-async function getSettings() {
+function getSettings() {
     if (!_settings) {
         _settings = {};
         const missingFromEnv = [];
-        Object.keys(requiredFromEnv).forEach((k) => {
-            let envName = requiredFromEnv[k];
-            const v = process.env[envName];
-            if (v === undefined) {
-                missingFromEnv.push(envName);
+        Object.entries(requiredFromEnv).forEach(([key, envKey]) => {
+            const envValue = process.env[envKey];
+            if (!envValue) {
+                missingFromEnv.push(envKey);
             }
-            _settings[k] = v;
+            _settings[key] = envValue;
         });
-        Object.keys(optionalFromEnv).forEach((k) => {
-            let envName = optionalFromEnv[k];
-            const v = process.env[envName];
-            _settings[k] = v;
+        Object.entries(optionalFromEnv).forEach(([key, envKey]) => {
+            _settings[key] = process.env[envKey];
         });
         if (missingFromEnv.length) {
             throw new Error(`Setting(s) missing in ENV: ${missingFromEnv.join(", ")}`);

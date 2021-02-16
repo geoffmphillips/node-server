@@ -11,12 +11,9 @@ exports.sessionHandler = void 0;
 //   function getSessionCookieMaxAge(setting) {
 //     return setting.sessionCookieMaxAge || ONE_HOUR;
 //   }
-//   function getSessionCookieName(setting) {
-//     if (setting.sessionCookieName) {
-//       return setting.sessionCookieName;
-//     }
-//     return "_sessionId";
-//   }
+// function getSessionCookieName(setting) {
+//   return setting.sessionCookieName ? setting.sessionCookieName : "_sessionId";
+// }
 //   function getSessionCookieSecure(setting) {
 //     return setting.sessionCookieSecure || false;
 //   }
@@ -29,7 +26,6 @@ exports.sessionHandler = void 0;
 //     if (!ctx.sessionInfo) {
 //       ctx.sessionInfo = await dbSession.create(ctx.requestId);
 //     }
-//     ctx.session = ctx.sessionInfo.data;
 //   }
 //   async function clearCookie(ctx, setting) {
 //     const sessionCookieName = getSessionCookieName(setting);
@@ -55,7 +51,7 @@ exports.sessionHandler = void 0;
 //     const sessionCookieMaxAge = getSessionCookieMaxAge(setting);
 //     await dbSession.update(ctx.sessionInfo, sessionCookieMaxAge, ctx.requestId);
 //   }
-//   async function middleware(ctx, next) {
+//   async function sessionHandler(ctx, next) {
 //     const s = await getSettings();
 //     if (ctx.url.match('/logout')) {
 //       await clearCookie(ctx, s);
@@ -64,14 +60,13 @@ exports.sessionHandler = void 0;
 //     } else {
 //       await init(ctx, s);
 //       await setCookie(ctx, s);
-//       await next();
 //       await commit(ctx, s);
 //     }
 //   }
 //   return {
 //     getSessionCookieName,
 //     getSessionCookieMaxAge,
-//     middleware,
+//     sessionHandler,
 //   };
 // }
 function sessionHandler(context) {

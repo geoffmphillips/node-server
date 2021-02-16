@@ -20,7 +20,6 @@ const requestHandlerConstructor = (sessionHandler, dbProvider, routes, middlewar
                 };
             }, {}) : {};
             const requestUrl = new url_1.URL(`${process.env.BASE_URL}${request.url}`);
-            console.log(requestUrl);
             const context = createContext(sessionHandler, ...middleware)({
                 request,
                 response,
@@ -28,18 +27,6 @@ const requestHandlerConstructor = (sessionHandler, dbProvider, routes, middlewar
                 requestUrl,
                 dbProvider,
             });
-            try {
-                console.log('here?', context.dbProvider);
-                context.dbProvider(async (db) => {
-                    await db.none('INSERT INTO users(id, email) VALUES (${id}, ${email});', {
-                        email: 'testJOHN@test.test',
-                        id: '00000000-0000-0000-0000-000000000001',
-                    });
-                });
-            }
-            catch (error) {
-                console.log('errr??', error);
-            }
             const matchingRoute = findMatchingRoute(requestUrl.pathname, routes);
             if (matchingRoute && matchingRoute[context.request.method]) {
                 // TO DO implement AUTH
@@ -56,6 +43,7 @@ const requestHandlerConstructor = (sessionHandler, dbProvider, routes, middlewar
             }
         }
         catch (error) {
+            console.error(`Error: ${error.message}`, error);
             serveError(500, response);
         }
         response.end();
