@@ -1,4 +1,4 @@
-import { uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 import { resolvedNull } from '../utils/resolved_null';
 import { db, dbType } from './db';
@@ -14,7 +14,7 @@ export type sessionInfoType = {
 export function dbSessionConstructor(db: dbType) {
   return {
     async create(): Promise<{ id: string }> {
-      const uuid = uuidv4();
+      const uuid = v4();
       const session = await db.one(`
         INSERT INTO sessions (id) VALUES ($(uuid))
         RETURNING encode(id, 'hex') AS id;`,
