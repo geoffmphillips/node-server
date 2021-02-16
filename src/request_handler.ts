@@ -71,6 +71,7 @@ const requestHandlerConstructor = (
         serveError(404, response);
       }
     } catch (error) {
+      console.error(`Error: ${error.message}`, error);
       serveError(500, response);
     }
 
