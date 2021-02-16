@@ -17,6 +17,18 @@ export function sessionCtor(getSettings: () => settingsType) {
     return settings.sessionCookieName ? settings.sessionCookieName : "_sessionId";
   }
 
+  function clearCookie(context: contextType, settings: settingsType) {
+    const sessionCookieName = getSessionCookieName(settings);
+    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Expires=${Date.now()};` ]);
+  }
+
+  function setCookie(context: contextType, settings: settingsType) {
+    const sessionCookieName = getSessionCookieName(settings);
+    const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
+
+    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Max-Age=${sessionCookieMaxAge}; HttpOnly` ]);
+  }
+
   async function initSession(context: contextType, settings: settingsType) {
     const sessionCookieName = getSessionCookieName(settings);
 
@@ -29,43 +41,27 @@ export function sessionCtor(getSettings: () => settingsType) {
     }
   }
 
-  async function clearCookie(context: contextType, settings: settingsType) {
-    const sessionCookieName = getSessionCookieName(settings);
-    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Expires=${Date.now()};` ]);
-  }
-
-  async function setCookie(context: contextType, settings: settingsType) {
-    const sessionCookieName = getSessionCookieName(settings);
-    const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
-
-    context.response.setHeader('Set-Cookie', [...context.cookies, `${sessionCookieName}=${context.session.id}; Max-Age=${sessionCookieMaxAge}; HttpOnly` ]);
-  }
-
-  async function commit(context: contextType, settings: settingsType) {
+  async function updateSessionInDb(context: contextType, settings: settingsType) {
     const sessionCookieMaxAge = getSessionCookieMaxAge(settings);
     await dbSession.update(context.session, sessionCookieMaxAge);
   }
 
-  async function sessionHandler(context: contextType) {
+  return function sessionHandler(context: contextType) {
     const settings = getSettings();
 
     if (context.requestUrl.pathname.match('/logout')) {
-      await clearCookie(context, settings);
+      clearCookie(context, settings);
       // TODO implement logout redirect
       // context.redirect('/');
       return;
     } else {
-      await initSession(context, settings);
-      await setCookie(context, settings);
-      await commit(context, settings);
+      initSession(context, settings);
+      setCookie(context, settings);
+      updateSessionInDb(context, settings);
     }
 
     return context;
   }
-
-  return {
-    sessionHandler,
-  };
 }
 
 export const sessionHandler = sessionCtor(
