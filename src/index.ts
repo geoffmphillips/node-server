@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import { dbProvider } from './db/db'
+import { dbProvider } from './db/db_provider';
 import { requestHandlerConstructor, requestHandlerType } from './request_handler';
 import routes from './routes/index';
 import { resolvedNull } from './utils/resolved_null';
