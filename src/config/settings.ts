@@ -34,14 +34,12 @@ export async function getSettings(): Promise<settingsType> {
       if (v === undefined) {
         missingFromEnv.push(envName);
       }
-      console.log(`${k}=${v} [${envName}]`);
       _settings[k] = v;
     });
 
     Object.keys(optionalFromEnv).forEach((k) => {
       let envName = optionalFromEnv[k];
       const v = process.env[envName];
-      console.log(`${k}=${v} [${envName}]`);
       _settings[k] = v;
     });
 
