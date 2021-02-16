@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// import { dbProvider } from './db/db_provider'
+import { dbProvider } from './db/db'
 import { requestHandlerConstructor, requestHandlerType } from './request_handler';
 import routes from './routes/index';
 import { resolvedNull } from './utils/resolved_null';
@@ -11,7 +11,7 @@ import { sessionHandler } from './middleware/session/index';
 
 const requestHandler = requestHandlerConstructor(
   sessionHandler,
-  (context) => ({ ...context }),
+  dbProvider,
   routes,
 )
 

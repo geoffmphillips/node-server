@@ -22,13 +22,16 @@ type contextType = {
   request: requestType,
   response: responseType,
   auth?: authType,
+  requestUrl: URL,
+  dbProvider?: dbProviderType,
 }
 type middlewareType = (context: contextType) => contextType;
 type requestHandlerType = (request: requestType, reponse: responseType) => Promise<null>
+type dbProviderType = any
 
 const requestHandlerConstructor = (
     sessionHandler: middlewareType,
-    dbProvider: middlewareType,
+    dbProvider: any,
     routes,
     middleware: middlewareType[] = [],
 ): requestHandlerType => {
@@ -45,13 +48,13 @@ const requestHandlerConstructor = (
       }, {}) : {};
   
       const requestUrl: URL = new URL(`${process.env.BASE_URL}${request.url}`);
-      console.log(requestUrl)
   
-      const context: contextType = createContext(dbProvider, sessionHandler, ...middleware)({ 
+      const context: contextType = createContext(sessionHandler, ...middleware)({ 
         request, 
         response, 
         cookies,
         requestUrl,
+        dbProvider,
       });
 
       const matchingRoute = findMatchingRoute(requestUrl.pathname, routes);
@@ -77,7 +80,9 @@ const requestHandlerConstructor = (
 }
 
 const findMatchingRoute = (pathname: string, routes): string | undefined => {
-  if (!routes) return undefined;
+  if (!routes) {
+    return undefined;
+  }
 
   return routes[pathname] ? 
     routes[pathname]
