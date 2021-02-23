@@ -6,12 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = __importDefault(require("http"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const db_provider_1 = require("./db/db_provider");
+const db_1 = require("./db/db");
 const request_handler_1 = require("./request_handler");
 const index_1 = __importDefault(require("./routes/index"));
 const resolved_null_1 = require("./utils/resolved_null");
 const index_2 = require("./middleware/session/index");
-const requestHandler = request_handler_1.requestHandlerConstructor(index_2.sessionHandler, db_provider_1.dbProvider, index_1.default);
+const requestHandler = request_handler_1.requestHandlerConstructor(index_2.sessionHandler, db_1.db, index_1.default);
 const PORT = process.env.PORT;
 async function startServer(requestHandler) {
     http_1.default.createServer(requestHandler).listen(PORT);

@@ -8,10 +8,10 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const url_1 = require("url");
 const resolved_null_1 = require("./utils/resolved_null");
-const requestHandlerConstructor = (sessionHandler, dbProvider, routes, middleware = []) => {
+const requestHandlerConstructor = (sessionHandler, db, routes, middleware = []) => {
     return async function requestHandlerInstance(request, response) {
         try {
-            const cookieHeaders = request.headers['cookie'];
+            const cookieHeaders = request?.headers['cookie'];
             const cookies = cookieHeaders ? cookieHeaders.reduce((accCookies, cookie) => {
                 const cookieParts = cookie.split(';');
                 return {
@@ -24,18 +24,17 @@ const requestHandlerConstructor = (sessionHandler, dbProvider, routes, middlewar
                 request,
                 response,
                 cookies,
-                requestUrl,
-                dbProvider,
             });
             const matchingRoute = findMatchingRoute(requestUrl.pathname, routes);
             if (matchingRoute && matchingRoute[context.request.method]) {
-                // TO DO implement AUTH
-                // if (context.auth.isAuthorized) {
-                if (true) {
-                    matchingRoute[context.request.method](context);
+                if (matchingRoute[context.request.method].auth(context.session)) {
+                    db.tx((db) => {
+                        context.db = db;
+                        matchingRoute[context.request.method].handler(context);
+                    });
                 }
                 else {
-                    serveError(context.auth.isForbidden ? 403 : 401, response);
+                    serveError(403, response);
                 }
             }
             else {

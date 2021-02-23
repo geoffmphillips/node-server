@@ -1,14 +1,10 @@
-import { dbSession, sessionInfoType } from '../../db/db_session';
+import { dbSession } from '../../db/db_session';
 import { getSettings, settingsType } from '../../config/settings';
 import { contextType } from '../../request_handler';
 
 const ONE_HOUR = 60 * 60 * 1000;
 
-type dbSessionType = typeof dbSession;
-
-export type ctxSessionType = {sessionInfo: sessionInfoType, userId?: string};
-
-export function sessionCtor(getSettings: () => settingsType) {
+export function sessionConstructor(getSettings: () => settingsType) {
   function getSessionCookieMaxAge(settings: settingsType) {
     return settings.sessionCookieMaxAge || ONE_HOUR;
   }
@@ -49,21 +45,14 @@ export function sessionCtor(getSettings: () => settingsType) {
   return function sessionHandler(context: contextType) {
     const settings = getSettings();
 
-    if (context.requestUrl.pathname.match('/logout')) {
-      clearCookie(context, settings);
-      // TODO implement logout redirect
-      // context.redirect('/');
-      return;
-    } else {
-      initSession(context, settings);
-      setCookie(context, settings);
-      updateSessionInDb(context, settings);
-    }
+    initSession(context, settings);
+    setCookie(context, settings);
+    updateSessionInDb(context, settings);
 
     return context;
   }
 }
 
-export const sessionHandler = sessionCtor(
+export const sessionHandler = sessionConstructor(
   getSettings,
 );

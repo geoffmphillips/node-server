@@ -35,17 +35,9 @@ function sessionCtor(getSettings) {
     }
     return function sessionHandler(context) {
         const settings = getSettings();
-        if (context.requestUrl.pathname.match('/logout')) {
-            clearCookie(context, settings);
-            // TODO implement logout redirect
-            // context.redirect('/');
-            return;
-        }
-        else {
-            initSession(context, settings);
-            setCookie(context, settings);
-            updateSessionInDb(context, settings);
-        }
+        initSession(context, settings);
+        setCookie(context, settings);
+        updateSessionInDb(context, settings);
         return context;
     };
 }

@@ -3,12 +3,12 @@ import { v4 } from 'uuid';
 import { resolvedNull } from '../utils/resolved_null';
 import { db, dbType } from './db';
 
-export type sessionInfoType = {
+export type sessionType = {
   id: string,
   userId?: string,
   displayName?: string,
   email?: string,
-  permission?: { [name: string]: boolean }
+  roles?: string[],
 };
 
 export function dbSessionConstructor(db: dbType) {
@@ -21,26 +21,27 @@ export function dbSessionConstructor(db: dbType) {
         { uuid }
       );
 
-      if (!session || !session.id) {
-        throw Error('could not create a new session.');
+      if (!session?.id) {
+        throw Error('Could not create a new session.');
       }
 
       return { id: session.id };
     },
 
-    async verify(sessionId: string): Promise<sessionInfoType | null> {
+    async verify(sessionId: string): Promise<sessionType | null> {
       const session = await db.oneOrNone(`
-          SELECT user_id
-          FROM sessions
-          WHERE id=decode($(sessionId), 'hex')
-          AND expire_at > now()`,
+          SELECT s.user_id, u.roles
+          FROM sessions s
+          LEFT JOIN users u ON s.user_id = u.id
+          WHERE s.id=decode($(sessionId), 'hex')
+          AND s.expire_at > now()`,
           { sessionId },
       );
 
-      return session ? { id: sessionId, userId: session.user_id } : resolvedNull;
+      return session ? { id: sessionId, userId: session.user_id, roles: session?.roles } : resolvedNull;
     },
 
-    async update(session: sessionInfoType, expiryInterval: number): Promise<null> {
+    async update(session: sessionType, expiryInterval: number): Promise<null> {
       await db.result(`
         UPDATE sessions 
         SET 
