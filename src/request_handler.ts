@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { URL } from 'url';
 import { resolvedNull } from './utils/resolved_null';
+import { dbType } from './db/db';
 
 type authType = {
   isForbidden: boolean,
@@ -23,17 +24,16 @@ type contextType = {
   response: responseType,
   auth?: authType,
   requestUrl: URL,
-  dbProvider?: dbProviderType,
+  db?: dbType,
   cookies?: string[],
   session?: any,
 }
 type middlewareType = (context: contextType) => contextType;
 type requestHandlerType = (request: requestType, reponse: responseType) => Promise<null>
-type dbProviderType = any
 
 const requestHandlerConstructor = (
     sessionHandler: middlewareType,
-    dbProvider: any,
+    db: any,
     routes,
     middleware: middlewareType[] = [],
 ): requestHandlerType => {
@@ -56,16 +56,16 @@ const requestHandlerConstructor = (
         response, 
         cookies,
         requestUrl,
-        dbProvider,
       });
 
       const matchingRoute = findMatchingRoute(requestUrl.pathname, routes);
       
       if (matchingRoute && matchingRoute[context.request.method]) {
-        // TO DO implement AUTH
-        // if (context.auth.isAuthorized) {
-        if (true) {
-          matchingRoute[context.request.method](context)
+        if (matchingRoute[context.request.method].auth(context.session)) {
+          db.tx((db: dbType) => {
+            context.db = db;
+            matchingRoute[context.request.method].handler(context)
+          });
         } else {
           serveError(context.auth.isForbidden ? 403 : 401, response);
         }
