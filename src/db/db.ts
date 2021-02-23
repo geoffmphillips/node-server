@@ -15,4 +15,4 @@ function dbConstructor(settings: () => settingsType, test: boolean = false): dbT
 
 db = dbConstructor(getSettings)
 
-export { db, dbType };
+export { db, dbType, dbConstructor };
