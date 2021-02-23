@@ -7,22 +7,23 @@ const db_1 = require("./db");
 function dbSessionConstructor(db) {
     return {
         async create() {
-            const uuid = uuid_1.uuidv4();
+            const uuid = uuid_1.v4();
             const session = await db.one(`
         INSERT INTO sessions (id) VALUES ($(uuid))
         RETURNING encode(id, 'hex') AS id;`, { uuid });
-            if (!session || !session.id) {
-                throw Error('could not create a new session.');
+            if (!session?.id) {
+                throw Error('Could not create a new session.');
             }
             return { id: session.id };
         },
         async verify(sessionId) {
             const session = await db.oneOrNone(`
-          SELECT user_id
-          FROM sessions
-          WHERE id=decode($(sessionId), 'hex')
-          AND expire_at > now()`, { sessionId });
-            return session ? { id: sessionId, userId: session.user_id } : resolved_null_1.resolvedNull;
+          SELECT s.user_id, u.roles
+          FROM sessions s
+          LEFT JOIN users u ON s.user_id = u.id
+          WHERE s.id=decode($(sessionId), 'hex')
+          AND s.expire_at > now()`, { sessionId });
+            return session ? { id: sessionId, userId: session.user_id, roles: session?.roles } : resolved_null_1.resolvedNull;
         },
         async update(session, expiryInterval) {
             await db.result(`

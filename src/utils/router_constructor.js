@@ -2,16 +2,22 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.routerContstructor = void 0;
 function routerContstructor(prefix) {
-    const addRoute = (path, controllerMethod, httpMethod, __context) => {
-        __context[prefix + path] = { [httpMethod]: controllerMethod };
+    let router;
+    const addRoute = (path, controllerMethod, httpMethod, auth) => {
+        router[prefix + path] = {
+            [httpMethod]: {
+                auth,
+                handler: controllerMethod,
+            }
+        };
     };
-    const router = {
+    router = {
         addRoute,
-        get: (path, method) => {
-            addRoute(path, method, 'GET', router);
+        get: (path, method, auth) => {
+            addRoute(path, method, 'GET', auth);
         },
-        post: (path, method) => {
-            addRoute(path, method, 'POST', router);
+        post: (path, method, auth) => {
+            addRoute(path, method, 'POST', auth);
         },
     };
     return router;

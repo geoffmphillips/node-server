@@ -24,6 +24,7 @@ async function migrateDb(db) {
             await db.none(migrationSql);
             await db.none('INSERT INTO meta.migrations (id) VALUES ($(id))', { id });
             console.log(`Applied migration ${id}`);
+            return resolved_null_1.resolvedNull;
         }
         catch (error) {
             console.log(`${id} not applied do to error:`, error);
