@@ -3,11 +3,8 @@ import path from 'path';
 import { URL } from 'url';
 import { resolvedNull } from './utils/resolved_null';
 import { dbType } from './db/db';
+import { routerType } from './utils/router_constructor';
 
-type authType = {
-  isForbidden: boolean,
-  isAuthorized: boolean,
-}
 type requestType = {
   headers?: any,
   url?: string,
@@ -16,14 +13,12 @@ type requestType = {
 type responseType = {
   setHeader: (header: string, value: string | string[]) => void,
   end: (data?: string) => void,
-  writeHead: (errocode: number, headers?: {}) => void,
+  writeHead: (code: number, headers?: {}) => void,
   write: (html: Buffer) => void,
 };
 type contextType = {
   request: requestType,
   response: responseType,
-  auth?: authType,
-  requestUrl: URL,
   db?: dbType,
   cookies?: string[],
   session?: any,
@@ -33,14 +28,14 @@ type requestHandlerType = (request: requestType, reponse: responseType) => Promi
 
 const requestHandlerConstructor = (
     sessionHandler: middlewareType,
-    db: any,
-    routes,
+    db: dbType,
+    routes: routerType,
     middleware: middlewareType[] = [],
 ): requestHandlerType => {
 
   return async function requestHandlerInstance(request, response): Promise<null> {
     try {
-      const cookieHeaders = request.headers['cookie'];
+      const cookieHeaders = request?.headers['cookie'];
       const cookies = cookieHeaders ? cookieHeaders.reduce((accCookies: {}, cookie: string) => {
         const cookieParts = cookie.split(';');
         return {
@@ -55,7 +50,6 @@ const requestHandlerConstructor = (
         request, 
         response, 
         cookies,
-        requestUrl,
       });
 
       const matchingRoute = findMatchingRoute(requestUrl.pathname, routes);
@@ -66,8 +60,10 @@ const requestHandlerConstructor = (
             context.db = db;
             matchingRoute[context.request.method].handler(context)
           });
+          // TODO implement logout redirect
+          // context.redirect('/');
         } else {
-          serveError(context.auth.isForbidden ? 403 : 401, response);
+          serveError(403, response);
         }
       } else {
         serveError(404, response);
